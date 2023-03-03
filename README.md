@@ -2,7 +2,7 @@
 - 👀 I’m interested in UI
 - 🌱 I’m currently learning C#
 - 💞️ I’m looking to collaborate on dance
-- 📫 How to reach me none
+- 📫 neosciencefiction899@gmail.com
 
 <!---
 yu22114/yu22114 is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.

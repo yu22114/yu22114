@@ -10,100 +10,133 @@ using UnityEngine.InputSystem;
 /// </summary>
 public sealed class Game : GameBase
 {
-    // 変数の宣言
+  // 変数の宣言
 
-    	    int money;
-    	    const int CARD_TYPE = 10;
-    	    int[] card_count = new int [CARD_TYPE];
-    	    string[] card_name =
-    	    	    {"A","B","C","D","E","F","G","H","I","J"};
-    	    bool isComplete;
-    	    int new_card ;
-          int bp;
+  int ball_x;
+  int ball_y;
+  int ball_speed_x;
+  int ball_speed_y;
+  int player_x;
+  int player_y;
+  int player_w;
+  int player_h;
+  //宣言
+  const int BLOCK_NUM = 50;
+  int[] block_x = new int [BLOCK_NUM];
+  int[] block_y = new int [BLOCK_NUM];
+  bool[] block_alive_flag = new bool [BLOCK_NUM];
+  int block_w = 64;
+  int block_h = 20;
+  int time ;
 
-
-    /// <summary>
-    /// 初期化処理
-    /// </summary>
-    public override void InitGame()
+  /// <summary>
+  /// 初期化処理
+  /// </summary>
+  public override void InitGame()
+  {
+    // キャンバスの大きさを設定します
+    gc.SetResolution(640, 480);
+    ball_x = 0;
+    ball_y = 0;
+    ball_speed_x = 3;
+    ball_speed_y = 3;
+    player_x = 270;
+    player_y = 460;
+    player_w = 100;
+    player_h = 20;
+    //初期化
+    for(int i =0 ; i < BLOCK_NUM ; i ++ )
     {
-resetValue();
+      block_x[i] = (i % 10 ) * block_w;
+      block_y[i] = (i / 10 ) * block_h;
+      block_alive_flag[i] = true;
+    }
+    time = 0;
+  }
+
+  /// <summary>
+  /// 動きなどの更新処理
+  /// </summary>
+  public override void UpdateGame()
+  {
+    // 起動からの経過時間を取得します
+
+    ball_x = ball_x + ball_speed_x;
+    ball_y = ball_y + ball_speed_y;
+
+    if( ball_x < 0 ) {
+      ball_x = 0;
+      ball_speed_x = -ball_speed_x;
     }
 
-    /// <summary>
-    /// 動きなどの更新処理
-    /// </summary>
-    public override void UpdateGame()
-    {
+    if( ball_y < 0 ) {
+      ball_y = 0;
+      ball_speed_y = -ball_speed_y;
+    }
 
-      if (gc.GetPointerFrameCount(0)==1 && ! isComplete) {
-      	money -= 100;
+    if( ball_x > 616 ) {
+      ball_x = 616;
+      ball_speed_x = -ball_speed_x;
+    }
 
-        bp = gc.Random(0,4);
 
-        if( bp == 0)
-        {
-          new_card = gc.Random(0,4);
+    if(gc.GetPointerFrameCount(0) > 0 ){
+      player_x = (int)gc.GetPointerX(0) - player_w/2;
+      player_y = (int)gc.GetPointerY(0) - player_h/2;
+
+    }
+    if( gc.CheckHitRect(ball_x,ball_y,24,24,player_x,player_y,player_w,player_h)){
+      if(ball_speed_y > 0){
+        ball_speed_y = -ball_speed_y;
+      }
+    }
+
+    //処理
+      for(int i =0 ; i < BLOCK_NUM ; i ++ ){
+//        if(i > 0 ){
+//            time += 1;
+        if(gc.CheckHitRect(ball_x,ball_y,24,24,
+        block_x[i],block_y[i],block_w,block_h)){
+          block_alive_flag[i] = false;
         }
-        else{
-          new_card = gc.Random(5,9);
-        }
+//      }
+    }
+  }
 
-      	card_count[new_card]++;
+  /// <summary>
+  /// 描画の処理
+  /// </summary>
+  public override void DrawGame()
+  {
+    // 画面を白で塗りつぶします
+    gc.ClearScreen();
+    // 0番の画像を描画します
+    gc.DrawImage(GcImage.BlueSky, 0, 0);
+    gc.DrawImage(GcImage.BallYellow,ball_x,ball_y);
+    gc.SetColor(0, 0, 255);
+    gc.FillRect(player_x,player_y,player_w,player_h);
 
-      	// isComplete = true;
-      	// for (int i = 0; i < CARD_TYPE; i++) {
-      	// 	if (card_count [i] == 0) {
-      	// 		isComplete = false;
-      	// 	}
-      	// }
-        isComplete = false;
-  	for (int i=0; i<5;i++) {
-  		if (card_count [i] >= 5) {
-  			isComplete = true;
-  		}
-          }
-      }
-      if(gc.GetPointerFrameCount(0) >= 120){
-        resetValue();
+      for(int i =0 ; i < BLOCK_NUM ; i ++ ){
+      if(block_alive_flag[i] == true){
+      gc.FillRect(block_x[i],block_y[i],block_w,block_h);
       }
     }
-
-    /// <summary>
-    /// 描画の処理
-    /// </summary>
-    public override void DrawGame()
-    {
-
-	gc.ClearScreen();
-	gc.SetColor(0,0,0);
-	gc.SetFontSize(36);
-	gc.DrawString("money:"+money,60, 40);
-
-	if(new_card >= 0){
-	  gc.DrawString("new:"+card_name[new_card],60, 80);
-	}
-
-	for(int i=0 ; i< CARD_TYPE ; i++){
-          gc.DrawString(card_name[i] + ":" + card_count[i],60, 120+i*40);
-	}
-
-	if(isComplete ){
-	  gc.DrawString("complete!!",60, 520);
-	}
-  //Drawの後、クラスを閉じる括弧の前にメソッドを追加
-
-   }
-   void resetValue()
-   {
-      //InitGameに書いている初期化処理を書く
-      money = 10000;
-      for (int i = 0; i < CARD_TYPE; i++) {
-        card_count[i] = 0;
-      }
-      isComplete = false;
-      new_card = -1;
-
+    for(int i =0 ; i < BLOCK_NUM ; i ++ ){
+    if(i > 0)
+    gc.DrawString("time:" + time);
+    if(i == 0 ) {
+      gc.DrawString("CLEAR!");
     }
+  }
+}
 
+  int countBlock(){
+  int num = 0;
+  for(int i =0 ; i < BLOCK_NUM ; i ++ ){
+    if(block_alive_flag[i]){
+      num++;
+    }
+  }
+  return num;
+}
 }

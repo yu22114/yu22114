@@ -1,7 +1,7 @@
 - 👋 Hi, I’m @yu22114
 - 👀 I’m interested in UI
 - 🌱 I’m currently learning C#
-- 💞️ I’m looking to collaborate on dance
+- 💞️ I’m looking to collaborate on streetdance
 - 📫 neosciencefiction899@gmail.com
 
 <!---
